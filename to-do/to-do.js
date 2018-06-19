@@ -17,18 +17,25 @@ const saveDB = () => {
     });
 }
 
-const create = (description) => {
+const create = (description, complete = false, id = 0 ) => {
     loadDB();
-    let index = listTo.length;
-    if( index ){
-        id = listTo[index-1]['id'] + 1;
+    var _id = 1;
+    if( id ){
+        _id = id;
+        let task = read( id );
+        if( task ){
+            return "ID is Already Assigned";
+        }
     }else{
-        id = 1;
+        let index = listTo.length;   
+        if( index ){
+            _id = listTo[index-1]['id'] + 1;
+        }
     }
     let task = {
-        id, 
+        id : _id, 
         description,
-        complete : false
+        completed : Boolean(complete)
     }
     listTo.push( task );
     saveDB()
@@ -44,11 +51,15 @@ const read = ( id ) => {
         return undefined;
 }
 
-const update = ( id, complete = true ) => {
+const update = ( id, description, completed = true ) => {
+    
     loadDB();
     let task = read( id );
     if( task ){
-        task.complete = true;
+        task.completed = completed;
+        if( description ){
+            task.description = description;
+        }
         saveDB();
         return task;
     }
@@ -66,10 +77,10 @@ const deleteTask = ( id ) => {
     return false;
 }
 
-const getList = ( complete = false ) => {
+const getList = ( completed = false ) => {
     loadDB();
-    if( complete && complete !== "false" ){
-        let listC = listTo.filter( task => task.complete === true );
+    if( completed && completed !== "false" ){
+        let listC = listTo.filter( task => task.completed === true );
         return listC;
     }
     return listTo;
