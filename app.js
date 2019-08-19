@@ -6,7 +6,7 @@ const color = require('colors');
 switch (argv._[0]) {
     case 'create':
         var resp = todo.create(argv.description, argv.completed === "false" ? false : argv.completed, Number(argv.id));
-        console.log(resp);
+        console.log(color.blue(resp));
         break;
     case 'read':
         var resp = todo.read(argv.id);

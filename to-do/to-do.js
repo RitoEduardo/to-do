@@ -4,7 +4,7 @@ let listTo = [];
 
 const loadDB = () => {
     try {
-        listTo = require('../db/data.json');    
+        listTo = require('../db/data.json');
     } catch (error) {
         listTo = [];
     }
@@ -12,52 +12,57 @@ const loadDB = () => {
 
 const saveDB = () => {
     let data = JSON.stringify(listTo);
-    fs.writeFile( './db/data.json', data, (err) => {
-        if (err) throw err;
+    fs.writeFile('./db/data.json', data, (err) => {
+        if (err) throw new Error("No se pudo guardar", err);
     });
 }
 
-const create = (description, complete = false, id = 0 ) => {
+const fnSearchIndex = (haulage) => {
+    let index = listTo.length;
+    _id = listTo[index - 1]['id'] + haulage;
+    if (read(_id)) {
+        return fnSearchIndex(++haulage)
+    }
+    return _id;
+}
+
+const create = (description, complete = false, id = 0) => {
     loadDB();
-    var _id = 1;
-    if( id ){
+    let _id = 1;
+    if (id) { //Declaro el ID
         _id = id;
-        let task = read( id );
-        if( task ){
-            return "ID is Already Assigned";
+        let task = read(id);
+        if (task) {
+            throw new Error("ID is Already Assigned");
         }
-    }else{
-        let index = listTo.length;   
-        if( index ){
-            _id = listTo[index-1]['id'] + 1;
-        }
+    } else if (listTo.length) {
+        _id = fnSearchIndex(1);
     }
     let task = {
-        id : _id, 
+        id: _id,
         description,
-        completed : Boolean(complete)
+        completed: Boolean(complete)
     }
-    listTo.push( task );
+    listTo.push(task);
     saveDB()
     return task;
 };
 
-const read = ( id ) => {
+const read = (id) => {
     loadDB();
-    let index = listTo.findIndex( task => task.id === id );    
-    if( index > -1 )
+    let index = listTo.findIndex(task => task.id === id);
+    if (index > -1)
         return listTo[index]
     else
         return undefined;
 }
 
-const update = ( id, description, completed = true ) => {
-    
+const update = (id, description, completed = true) => {
     loadDB();
-    let task = read( id );
-    if( task ){
+    let task = read(id);
+    if (task) {
         task.completed = completed;
-        if( description ){
+        if (description) {
             task.description = description;
         }
         saveDB();
@@ -66,21 +71,21 @@ const update = ( id, description, completed = true ) => {
     return " Tarea no encontrada";
 }
 
-const deleteTask = ( id ) => {
+const deleteTask = (id) => {
     loadDB();
-    let index = listTo.findIndex( task => task.id === id );    
-    let resp = listTo.splice( index, 1 );
-    if( resp.length ){
+    let index = listTo.findIndex(task => task.id === id);
+    let resp = listTo.splice(index, 1);
+    if (resp.length) {
         saveDB();
         return true;
     }
     return false;
 }
 
-const getList = ( completed = false ) => {
+const getList = (completed = false) => {
     loadDB();
-    if( completed && completed !== "false" ){
-        let listC = listTo.filter( task => task.completed === true );
+    if (completed && completed !== "false") {
+        let listC = listTo.filter(task => task.completed === true);
         return listC;
     }
     return listTo;
