@@ -26,6 +26,19 @@ const fnSearchIndex = (haulage) => {
     return _id;
 }
 
+const fnValidateCompleted = (value) => {
+
+    switch (value) {
+        case "true":
+        case true:
+            return true;
+        case "false":
+        case false:
+            return false;
+    }
+    return undefined;
+}
+
 const create = (description, complete = false, id = 0) => {
     loadDB();
     let _id = 1;
@@ -41,7 +54,7 @@ const create = (description, complete = false, id = 0) => {
     let task = {
         id: _id,
         description,
-        completed: Boolean(complete)
+        completed: fnValidateCompleted(complete)
     }
     listTo.push(task);
     saveDB()
@@ -68,24 +81,25 @@ const update = (id, description, completed = true) => {
         saveDB();
         return task;
     }
-    return " Tarea no encontrada";
+    throw new Error("Tarea no encontrada");
 }
 
 const deleteTask = (id) => {
     loadDB();
     let index = listTo.findIndex(task => task.id === id);
-    let resp = listTo.splice(index, 1);
-    if (resp.length) {
+    if (index != -1) {
+        let resp = listTo.splice(index, 1);
         saveDB();
         return true;
     }
     return false;
 }
 
-const getList = (completed = false) => {
+const getList = (filter = false, completed) => {
     loadDB();
-    if (completed && completed !== "false") {
-        let listC = listTo.filter(task => task.completed === true);
+    if (filter) {
+        _completed = fnValidateCompleted(completed);
+        let listC = listTo.filter(task => task.completed == _completed);
         return listC;
     }
     return listTo;
